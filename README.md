@@ -198,7 +198,7 @@ cd LightNote-AI
    - **Region**: Choose the closest to you
    - **Root Directory**: `server`
    - **Environment**: `Node`
-   - **Build Command**: `npm install && npm run build`
+   - **Build Command**: `npm install --include=dev && npm run build`
    - **Start Command**: `npm start`
    - **Plan**: `Free`
 5. Under **Environment Variables**, add:
