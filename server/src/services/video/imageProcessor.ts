@@ -75,13 +75,77 @@ Respond with JSON only.`;
 }
 
 /**
+ * Map common object names to appropriate emojis for visual representation.
+ */
+function getEmojiForObject(name: string): string {
+  const lower = (name || "").toLowerCase();
+  if (lower.includes("dog") || lower.includes("puppy") || lower.includes("hound")) return "🐶";
+  if (lower.includes("cat") || lower.includes("kitten")) return "🐱";
+  if (lower.includes("pepsi") || lower.includes("coke") || lower.includes("soda") || lower.includes("bottle") || lower.includes("drink")) return "🥤";
+  if (lower.includes("car") || lower.includes("auto") || lower.includes("vehicle")) return "🚗";
+  if (lower.includes("face") || lower.includes("person") || lower.includes("human") || lower.includes("man") || lower.includes("woman")) return "👤";
+  if (lower.includes("glasses") || lower.includes("sunglasses")) return "🕶️";
+  if (lower.includes("hat") || lower.includes("cap")) return "🧢";
+  if (lower.includes("pizza") || lower.includes("food") || lower.includes("burger")) return "🍕";
+  if (lower.includes("coffee") || lower.includes("tea") || lower.includes("cup")) return "☕";
+  if (lower.includes("phone") || lower.includes("mobile")) return "📱";
+  if (lower.includes("laptop") || lower.includes("computer")) return "💻";
+  if (lower.includes("robot") || lower.includes("bot")) return "🤖";
+  if (lower.includes("money") || lower.includes("cash") || lower.includes("dollar")) return "💵";
+  if (lower.includes("apple") || lower.includes("fruit")) return "🍎";
+  if (lower.includes("ball") || lower.includes("soccer") || lower.includes("football")) return "⚽";
+  if (lower.includes("flower") || lower.includes("plant")) return "🌸";
+  if (lower.includes("star")) return "⭐";
+  if (lower.includes("fire")) return "🔥";
+  return "✨";
+}
+
+/**
+ * Generate a high-contrast, polished SVG visual badge/sticker for replacement
+ * when no user reference image was provided.
+ */
+export async function createVisualSticker(
+  replacementText: string,
+  width: number,
+  height: number
+): Promise<Buffer> {
+  const emoji = getEmojiForObject(replacementText);
+  const cleanLabel = (replacementText || "Replacement")
+    .replace(/[<>&'"]/g, "")
+    .slice(0, 16);
+
+  const fontSize = Math.max(12, Math.min(28, Math.round(Math.min(width, height) * 0.16)));
+  const emojiSize = Math.max(20, Math.min(80, Math.round(Math.min(width, height) * 0.42)));
+
+  const svg = `
+<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+  </defs>
+  <rect x="3" y="3" width="${width - 6}" height="${height - 6}" rx="${Math.min(20, Math.round(width * 0.12))}" fill="url(#grad)" stroke="#ffffff" stroke-width="3"/>
+  <text x="50%" y="${Math.round(height * 0.44)}" font-size="${emojiSize}" text-anchor="middle" dominant-baseline="central">${emoji}</text>
+  <rect x="${Math.round(width * 0.1)}" y="${Math.round(height * 0.72)}" width="${Math.round(width * 0.8)}" height="${Math.round(fontSize * 1.5)}" rx="5" fill="#0f172a" fill-opacity="0.8" />
+  <text x="50%" y="${Math.round(height * 0.72 + fontSize * 1.05)}" font-size="${fontSize}" font-family="system-ui, -apple-system, sans-serif" font-weight="700" fill="#ffffff" text-anchor="middle">${cleanLabel}</text>
+</svg>`;
+
+  return await sharp(Buffer.from(svg))
+    .resize(width, height)
+    .png()
+    .toBuffer();
+}
+
+/**
  * Apply object replacement on a single frame using sharp.
- * Overlays the reference image (or a colored rectangle) on the detected region.
+ * Overlays the reference image (or a dynamic smart sticker) on the detected region.
  */
 export async function replaceObjectInFrame(
   framePath: string,
   bbox: BoundingBox,
-  referenceImagePath?: string
+  referenceImagePath?: string,
+  replacementLabel?: string
 ): Promise<void> {
   const image = sharp(framePath);
   const metadata = await image.metadata();
@@ -111,17 +175,12 @@ export async function replaceObjectInFrame(
       .png()
       .toBuffer();
   } else {
-    // Create a colored rectangle as placeholder replacement
-    overlay = await sharp({
-      create: {
-        width: safeWidth,
-        height: safeHeight,
-        channels: 4,
-        background: { r: 80, g: 120, b: 200, alpha: 0.85 },
-      },
-    })
-      .png()
-      .toBuffer();
+    // Generate dynamic smart sticker with icon and label
+    overlay = await createVisualSticker(
+      replacementLabel || "Replacement",
+      safeWidth,
+      safeHeight
+    );
   }
 
   // Composite the overlay onto the frame

@@ -147,7 +147,8 @@ export async function processVideoJob(jobId: string): Promise<void> {
         await replaceObjectInFrame(
           framePath,
           trackedBbox,
-          job.referenceImagePath
+          job.referenceImagePath,
+          instruction.replacement
         );
       } else {
         await removeObjectInFrame(framePath, trackedBbox);
