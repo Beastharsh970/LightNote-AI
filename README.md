@@ -184,6 +184,52 @@ cd LightNote-AI
 - **Custom System FFmpeg (Optional)**:
   If you prefer using your own system-installed FFmpeg instead of the bundled portable binary, simply set `FFMPEG_PATH` and `FFPROBE_PATH` in `server/.env`.
 
+---
+
+## 🌐 Deployment (Render + Vercel)
+
+### 1. Deploy Backend on [Render](https://render.com/)
+
+1. Push your latest code to GitHub.
+2. Go to your [Render Dashboard](https://dashboard.render.com/) and click **New +** → **Web Service**.
+3. Connect your repository: `Beastharsh970/LightNote-AI`.
+4. Fill in the settings:
+   - **Name**: `lightnoteai-backend`
+   - **Region**: Choose the closest to you
+   - **Root Directory**: `server`
+   - **Environment**: `Node`
+   - **Build Command**: `npm install && npm run build`
+   - **Start Command**: `npm start`
+   - **Plan**: `Free`
+5. Under **Environment Variables**, add:
+   | Key | Value |
+   | --- | --- |
+   | `MONGODB_URI` | `mongodb+srv://...` (your full Atlas connection string) |
+   | `AI_PROVIDER` | `gemini` |
+   | `GEMINI_API_KEY` | your Google AI Studio API key |
+   | `GEMINI_MODEL` | `gemini-2.0-flash` |
+   | `NODE_ENV` | `production` |
+6. Click **Deploy Web Service**.
+7. Once deployed, copy your Render backend URL (e.g. `https://lightnoteai-backend.onrender.com`).
+
+---
+
+### 2. Deploy Frontend on [Vercel](https://vercel.com/)
+
+1. Go to your [Vercel Dashboard](https://vercel.com/dashboard) and click **Add New...** → **Project**.
+2. Import your GitHub repository: `Beastharsh970/LightNote-AI`.
+3. In the project configuration:
+   - **Framework Preset**: `Vite`
+   - **Root Directory**: Click **Edit** and select `frontend`
+4. Expand **Environment Variables** and add:
+   | Key | Value |
+   | --- | --- |
+   | `VITE_API_URL` | `https://lightnoteai-backend.onrender.com` *(your Render URL from step 1)* |
+5. Click **Deploy**.
+6. When deployment finishes, your app will be live on your custom `https://*.vercel.app` URL!
+
+---
+
 ## API Endpoints
 
 | Method | Endpoint                  | Description                    |

@@ -1,8 +1,12 @@
 import axios from 'axios';
 import type { ApiResponse, JobResponse } from '../types';
 
+const API_BASE = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL.replace(/\/+$/, '')}/api`
+  : '/api';
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: API_BASE,
 });
 
 /**
@@ -52,7 +56,7 @@ export async function getJobStatus(jobId: string): Promise<JobResponse> {
  * Get the URL for the output video.
  */
 export function getOutputVideoUrl(jobId: string): string {
-  return `/api/jobs/${jobId}/output`;
+  return `${API_BASE}/jobs/${jobId}/output`;
 }
 
 /**
