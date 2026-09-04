@@ -84,68 +84,105 @@ PORT=5000
 
 Only the API key for your selected `AI_PROVIDER` is required.
 
-## Installation
+## 🚀 Quick Start & Local Setup
+
+Follow these steps to run the project locally on your machine.
 
 ### Prerequisites
 
-- **Node.js** ≥ 18
-- **MongoDB Atlas** account (free tier works)
-- **FFmpeg** installed and available in PATH
-- At least one AI API key (Gemini recommended — free tier available)
+Make sure you have:
+- **Node.js** (v18 or later) — [Download Node.js](https://nodejs.org/)
+- **npm** (comes with Node.js)
+- **MongoDB Atlas** account (Free tier) — [Create Atlas Account](https://www.mongodb.com/cloud/atlas/register)
+- **Google Gemini API Key** (Free tier available) — [Get Gemini API Key](https://aistudio.google.com/app/apikey)
+  *(Optionally, you can use OpenAI or Qwen instead)*
 
-### FFmpeg Setup
+> **Note on FFmpeg:** Portable FFmpeg and FFprobe binaries are already bundled in the backend dependencies (`@ffmpeg-installer/ffmpeg`), so **no manual FFmpeg installation or PATH configuration is needed!**
 
-**Windows:**
+---
+
+### Step-by-Step Installation
+
+#### 1. Clone the repository
 ```bash
-# Using Chocolatey
-choco install ffmpeg
-
-# Or download from https://ffmpeg.org/download.html and add to PATH
+git clone https://github.com/Beastharsh970/LightNote-AI.git
+cd LightNote-AI
 ```
 
-**macOS:**
-```bash
-brew install ffmpeg
-```
+#### 2. Backend Setup
+1. Navigate to the server folder and install dependencies:
+   ```bash
+   cd server
+   npm install
+   ```
 
-**Linux:**
-```bash
-sudo apt install ffmpeg
-```
+2. Create your `.env` file from the example:
+   - On Windows (PowerShell):
+     ```powershell
+     Copy-Item .env.example .env
+     ```
+   - On Mac/Linux:
+     ```bash
+     cp .env.example .env
+     ```
 
-### Install Dependencies
+3. Open `server/.env` and update the values:
+   ```env
+   # 1. Paste your MongoDB connection string
+   MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/?appName=Cluster0
 
-```bash
-# Backend
-cd server
-npm install
+   # 2. Select your AI provider (default is gemini)
+   AI_PROVIDER=gemini
 
-# Frontend
-cd ../frontend
-npm install
-```
+   # 3. Paste your Gemini API key (from Google AI Studio)
+   GEMINI_API_KEY=AIzaSy...
+   GEMINI_MODEL=gemini-2.0-flash
 
-## How to Run
+   PORT=5000
+   ```
 
-### Backend
+   > **MongoDB Atlas Tip:** Make sure your IP address is whitelisted in MongoDB Atlas under **Security** → **Network Access** → **Add IP Address** (choose *Allow Access from Anywhere `0.0.0.0/0`* for development).
 
-```bash
-cd server
-cp .env.example .env
-# Edit .env with your MongoDB URI and API keys
-npm run dev
-```
+4. Start the backend development server:
+   ```bash
+   npm run dev
+   ```
+   You should see:
+   ```text
+   ✅ MongoDB connected
+   🚀 LightNoteAI server running on http://localhost:5000
+   🤖 AI Provider: gemini
+   ```
 
-Server starts at `http://localhost:5000`
+---
 
-### Frontend
+#### 3. Frontend Setup
+1. Open a **new terminal tab/window**, navigate to the `frontend` folder and install dependencies:
+   ```bash
+   cd frontend
+   npm install
+   ```
 
-```bash
-cd frontend
-npm run dev
-```
+2. Start the frontend development server:
+   ```bash
+   npm run dev
+   ```
 
-Frontend starts at `http://localhost:5173` (proxies API requests to :5000)
+3. Open your browser and navigate to:
+   ```
+   http://localhost:5173
+   ```
+
+---
+
+### Troubleshooting Common Issues
+
+- **MongoDB Connection `querySrv ECONNREFUSED`**:
+  Certain local ISP / Wi-Fi DNS servers block MongoDB SRV lookups. The backend already includes an automatic fallback to Google and Cloudflare public DNS (`8.8.8.8`, `1.1.1.1`). If you still encounter issues, verify that your IP is allowed in MongoDB Atlas Network Access.
+- **Port 5000 already in use**:
+  You can change `PORT=5001` in `server/.env`. If you do, update the proxy port in `frontend/vite.config.ts` accordingly.
+- **Custom System FFmpeg (Optional)**:
+  If you prefer using your own system-installed FFmpeg instead of the bundled portable binary, simply set `FFMPEG_PATH` and `FFPROBE_PATH` in `server/.env`.
 
 ## API Endpoints
 
